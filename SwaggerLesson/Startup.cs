@@ -38,6 +38,11 @@ namespace SwaggerLesson
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
+			app.UseHeaderManipulatorMiddleware(options =>
+			{
+				options.Add("Content-Type");
+				options.Add("X-Client-IP");
+			});
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
@@ -45,11 +50,6 @@ namespace SwaggerLesson
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SwaggerLesson v1"));
 			}
 			app.UseForwardedHeaders();
-			app.UseHeaderManipulatorMiddleware(options =>
-			{
-				options.Add("Content-Type");
-				options.Add("X-Client-IP");
-			});
 			app.UseHttpsRedirection();
 			app.UseRouting();
 			app.UseAuthorization();

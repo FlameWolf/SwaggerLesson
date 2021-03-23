@@ -31,7 +31,7 @@ namespace SwaggerLesson.Middleware
 						httpContext.Response.Headers.Remove(headerToRemove);
 					}
 				});
-				return Task.FromResult(0);
+				return Task.CompletedTask;
 			});
 			await _next(httpContext);
 		}

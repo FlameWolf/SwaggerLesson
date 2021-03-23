@@ -34,7 +34,7 @@ namespace SwaggerLesson.Controllers
 				Response.Headers.Add
 				(
 					"X-Client-IP",
-					HttpContext.Features.Get<IHttpConnectionFeature>().LocalIpAddress.ToString()
+					HttpContext.Connection.RemoteIpAddress.ToString()
 				);
 			}
 			return Enumerable.Range(1, 5).Select(index => new WeatherForecast
