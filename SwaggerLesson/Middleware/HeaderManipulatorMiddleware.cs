@@ -12,19 +12,19 @@ namespace SwaggerLesson.Middleware
 	public class HeaderManipulatorMiddleware
 	{
 		private readonly RequestDelegate _next;
-		private readonly ImmutableList<string> _headersToRemove;
+		private readonly HeaderManipulatorOptions _headerManipulatorOptions;
 
-		public HeaderManipulatorMiddleware(RequestDelegate next, ImmutableList<string> headersToRemove)
+		public HeaderManipulatorMiddleware(RequestDelegate next, HeaderManipulatorOptions headerManipulatorOptions)
 		{
 			_next = next;
-			_headersToRemove = headersToRemove;
+			_headerManipulatorOptions = headerManipulatorOptions;
 		}
 
 		public async Task Invoke(HttpContext httpContext)
 		{
 			httpContext.Response.OnStarting(() =>
 			{
-				_headersToRemove.ForEach(headerToRemove =>
+				_headerManipulatorOptions.Headers.ToList().ForEach(headerToRemove =>
 				{
 					if (httpContext.Response.Headers.ContainsKey(headerToRemove))
 					{
@@ -44,7 +44,7 @@ namespace SwaggerLesson.Middleware
 		public static IApplicationBuilder UseHeaderManipulatorMiddleware(this IApplicationBuilder builder, Action<HeaderManipulatorOptions> action)
 		{
 			action.Invoke(_options);
-			return builder.UseMiddleware<HeaderManipulatorMiddleware>(_options.Headers.ToImmutableList());
+			return builder.UseMiddleware<HeaderManipulatorMiddleware>(_options);
 		}
 	}
 }
