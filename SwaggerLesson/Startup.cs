@@ -45,7 +45,11 @@ namespace SwaggerLesson
 				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "SwaggerLesson v1"));
 			}
 			app.UseForwardedHeaders();
-			app.UseHeaderManipulatorMiddleware("Content-Type", "X-Client-IP");
+			app.UseHeaderManipulatorMiddleware(options =>
+			{
+				options.Add("Content-Type");
+				options.Add("X-Client-IP");
+			});
 			app.UseHttpsRedirection();
 			app.UseRouting();
 			app.UseAuthorization();

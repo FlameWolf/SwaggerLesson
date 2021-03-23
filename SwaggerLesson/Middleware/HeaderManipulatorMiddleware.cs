@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using SwaggerLesson.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -38,9 +39,12 @@ namespace SwaggerLesson.Middleware
 
 	public static class HeaderManipulatorMiddlewareExtensions
 	{
-		public static IApplicationBuilder UseHeaderManipulatorMiddleware(this IApplicationBuilder builder, params string[] headersToRemove)
+		private static HeaderManipulatorOptions _options = new HeaderManipulatorOptions();
+
+		public static IApplicationBuilder UseHeaderManipulatorMiddleware(this IApplicationBuilder builder, Action<HeaderManipulatorOptions> action)
 		{
-			return builder.UseMiddleware<HeaderManipulatorMiddleware>(headersToRemove.ToImmutableList());
+			action.Invoke(_options);
+			return builder.UseMiddleware<HeaderManipulatorMiddleware>(_options.Headers.ToImmutableList());
 		}
 	}
 }
