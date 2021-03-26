@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -8,9 +9,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using SwaggerLesson.Middleware;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SwaggerLesson
@@ -27,12 +30,14 @@ namespace SwaggerLesson
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-
 			services.AddControllers();
+			services.AddHttpContextAccessor();
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1", new OpenApiInfo { Title = "SwaggerLesson", Version = "v1" });
+				c.ExampleFilters();
 			});
+			services.AddSwaggerExamplesFromAssemblies(Assembly.GetExecutingAssembly());
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,7 +45,6 @@ namespace SwaggerLesson
 		{
 			app.UseHeaderManipulatorMiddleware(options =>
 			{
-				options.Add("Content-Type");
 				options.Add("X-Client-IP");
 			});
 			if (env.IsDevelopment())
@@ -53,6 +57,7 @@ namespace SwaggerLesson
 			app.UseHttpsRedirection();
 			app.UseRouting();
 			app.UseAuthorization();
+			app.UseOptionsVerbHandlerMiddleware();
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();

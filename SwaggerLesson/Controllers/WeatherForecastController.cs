@@ -10,6 +10,7 @@ namespace SwaggerLesson.Controllers
 {
 	[ApiController]
 	[Route("[controller]")]
+	[Produces("application/json")]
 	public class WeatherForecastController : ControllerBase
 	{
 		private static readonly string[] Summaries = new[]
@@ -24,7 +25,6 @@ namespace SwaggerLesson.Controllers
 			_logger = logger;
 		}
 
-		[HttpOptions]
 		[HttpGet]
 		public IEnumerable<WeatherForecast> Get()
 		{
@@ -42,8 +42,7 @@ namespace SwaggerLesson.Controllers
 				Date = DateTime.Now.AddDays(index),
 				TemperatureC = rng.Next(-20, 55),
 				Summary = Summaries[rng.Next(Summaries.Length)]
-			})
-			.ToArray();
+			}).ToArray();
 		}
 	}
 }
