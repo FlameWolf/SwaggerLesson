@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using SwaggerLesson.Filters;
 using SwaggerLesson.Models;
 using SwaggerLesson.Utility;
 using Swashbuckle.AspNetCore.Filters;
@@ -17,6 +20,9 @@ namespace SwaggerLesson.Controllers
 	[Route("api/[controller]")]
 	[ApiController]
 	[Produces("application/json")]
+	[TestResultFilter("X-Controller", nameof(JsonPlaceholderController))]
+	[ServiceFilter(typeof(TestExceptionFilter))]
+	[ServiceFilter(typeof(TestAlwaysRunResultFilter))]
 	public class JsonPlaceholderController : ControllerBase
 	{
 		string _baseUri = "https://jsonplaceholder.typicode.com/";
@@ -32,6 +38,44 @@ namespace SwaggerLesson.Controllers
 				},
 				httpContextAccessor
 			);
+		}
+
+		[Route("test-short-circuit")]
+		[HttpGet]
+		[TestShortCircuitResourceFilterAttribute]
+		public async Task<JsonResult> TestShortCircuitResourceFilter()
+		{
+			return new JsonResult(new
+			{
+				Id = 256,
+				Name = "Jane Doe"
+			});
+		}
+
+		[Route("test-filters")]
+		[HttpGet]
+		[TestResultFilter("X-Controller-Action", nameof(TestFilters))]
+		[ServiceFilter(typeof(TestResultServiceFilter))]
+		[ServiceFilter(typeof(TestActionFilterAttribute))]
+		[
+			TypeFilter
+			(
+				typeof(TestActionTypeFilter),
+				Arguments = new[]
+				{
+					nameof(TestFilters),
+					nameof(TestActionTypeFilter)
+				}
+			)
+		]
+		[TestFilterFactory]
+		public async Task<JsonResult> TestFilters()
+		{
+			return new JsonResult(new
+			{
+				Id = 256,
+				Name = "Jane Doe"
+			});
 		}
 
 		[Route("get-all-posts")]
@@ -72,6 +116,13 @@ namespace SwaggerLesson.Controllers
 		public async Task<Comment> CreateComment(Comment request)
 		{
 			return await _jsonPlaceholderClient.CreateComment(request);
+		}
+
+		[Route("test-exception")]
+		[HttpGet]
+		public async Task TestExceptionFilter()
+		{
+			throw new Exception($"Exception thrown from {nameof(TestExceptionFilter)}");
 		}
 	}
 }

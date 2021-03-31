@@ -3,12 +3,16 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using SwaggerLesson.Filters;
 using SwaggerLesson.Middleware;
+using SwaggerLesson.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System;
 using System.Collections.Generic;
@@ -30,7 +34,22 @@ namespace SwaggerLesson
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllers();
+			services.AddLogging(config =>
+			{
+				config.AddConsole();
+				config.AddDebug();
+				config.AddEventLog();
+			});
+			services.AddSingleton<ILoggerFactory, LoggerFactory>();
+			services.Configure<PositionOptions>(Configuration.GetSection("Position"));
+			services.AddScoped<TestActionFilterAttribute>();
+			services.AddScoped<TestResultServiceFilter>();
+			services.AddScoped<TestExceptionFilter>();
+			services.AddScoped<TestAlwaysRunResultFilter>();
+			services.AddControllers(config =>
+			{
+				config.Filters.Add<TestActionFilter>();
+			});
 			services.AddHttpContextAccessor();
 			services.AddSwaggerGen(c =>
 			{
